@@ -1,9 +1,9 @@
 # phishing-awareness-quiz
 🎣 Interactive phishing awareness quiz with real email simulations — DecodeLab Cybersecurity Internship Task 3
-https://malikaira.github.io/phishing-awareness-quiz/
+
 # DecodeLab_Phishing_Quiz
 
-**Email Phishing Quiz — DecodeLab Cybersecurity Internship Task 4**
+**Email Phishing Quiz — DecodeLab Cybersecurity Internship Task 3**
 
 ## 🎣 Phishing Awareness Quiz
 
