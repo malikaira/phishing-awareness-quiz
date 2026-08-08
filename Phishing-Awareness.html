@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PhishGuard v2 — Phishing Awareness Tool</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+  :root {
+    --bg: #0b0f14;
+    --surface: #111720;
+    --surface2: #161d27;
+    --border: #1e2d3d;
+    --border2: #253344;
+    --green: #34c78f;
+    --green-dim: rgba(52,199,143,0.12);
+    --green-border: rgba(52,199,143,0.25);
+    --red: #e24b4a;
+    --red-dim: rgba(226,75,74,0.1);
+    --red-border: rgba(226,75,74,0.25);
+    --amber: #ef9f27;
+    --amber-dim: rgba(239,159,39,0.1);
+    --amber-border: rgba(239,159,39,0.25);
+    --text: #dce6f0;
+    --text2: #7a8fa6;
+    --text3: #4a6070;
+    --mono: 'Courier New', monospace;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  html[data-theme="light"] {
+    --bg: #f4f6f8;
+    --surface: #ffffff;
+    --surface2: #eef1f4;
+    --border: #dde3e9;
+    --border2: #ccd5de;
+    --green: #1a9b6e;
+    --green-dim: rgba(26,155,110,0.1);
+    --green-border: rgba(26,155,110,0.3);
+    --red: #c9302c;
+    --red-dim: rgba(201,48,44,0.08);
+    --red-border: rgba(201,48,44,0.28);
+    --amber: #b5760a;
+    --amber-dim: rgba(181,118,10,0.08);
+    --amber-border: rgba(181,118,10,0.28);
+    --text: #1a2430;
+    --text2: #55677a;
+    --text3: #8a97a6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { transition: background 0.2s, color 0.2s; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    padding: 24px 16px 48px;
+  }
+
+  /* ─── HEADER ─── */
+  .header {
+    max-width: 760px;
+    margin: 0 auto 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    width: 46px; height: 46px;
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: var(--green);
+    flex-shrink: 0;
+  }
+  .header-text h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
+  .header-text p { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .edu-badge {
+    margin-left: auto;
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: var(--green-dim);
+    border: 1px solid var(--green-border);
+    color: var(--green);
+    white-space: nowrap;
+  }
+
+  /* ─── TABS ─── */
+  .tabs {
+    max-width: 760px;
+    margin: 0 auto 24px;
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 4px;
+    gap: 4px;
+  }
+  .tab {
+    flex: 1;
+    padding: 9px 0;
+    border: none;
+    background: transparent;
+    color: var(--text2);
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-family: var(--sans);
+    transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+  }
+  .tab i { font-size: 14px; }
+  .tab.active {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border2);
+  }
+
+  /* ─── WRAPPER ─── */
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ─── SCANNER ─── */
+  .scanner-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .scanner-label {
+    font-size: 12px;
+    color: var(--text2);
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .scanner-label i { color: var(--green); }
+  .input-row {
+    display: flex;
+    gap: 10px;
+  }
+  .url-input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    outline: none;
+    transition: border 0.15s;
+  }
+  .url-input:focus { border-color: var(--green); }
+  .url-input::placeholder { color: var(--text3); }
+  .scan-btn {
+    padding: 11px 22px;
+    background: var(--green);
+    color: #0b0f14;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--sans);
+    display: flex; align-items: center; gap: 7px;
+    white-space: nowrap;
+    transition: opacity 0.15s;
+  }
+  .scan-btn:hover { opacity: 0.88; }
+
+  /* result panel */
+  .result-panel {
+    display: none;
+    margin-top: 16px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .result-panel.show { display: block; }
+  .risk-header {
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .risk-icon { font-size: 20px; }
+  .risk-label { font-size: 15px; font-weight: 600; }
+  .risk-sub { font-size: 12px; opacity: 0.75; margin-top: 2px; }
+  .risk-badge {
+    margin-left: auto;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 5px 14px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+  .risk-HIGH .risk-header { background: var(--red-dim); border-bottom: 1px solid var(--red-border); }
+  .risk-HIGH .risk-badge { background: var(--red); color: #fff; }
+  .risk-HIGH .risk-icon { color: var(--red); }
+  .risk-MED .risk-header { background: var(--amber-dim); border-bottom: 1px solid var(--amber-border); }
+  .risk-MED .risk-badge { background: var(--amber); color: #0b0f14; }
+  .risk-MED .risk-icon { color: var(--amber); }
+  .risk-LOW .risk-header { background: var(--green-dim); border-bottom: 1px solid var(--green-border); }
+  .risk-LOW .risk-badge { background: var(--green); color: #0b0f14; }
+  .risk-LOW .risk-icon { color: var(--green); }
+
+  .flags-list { padding: 14px 18px; background: var(--surface2); }
+  .flag-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 7px 0;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+  }
+  .flag-row:last-child { border-bottom: none; }
+  .flag-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+  .flag-dot.high { background: var(--red); }
+  .flag-dot.med { background: var(--amber); }
+  .flag-dot.low { background: var(--green); }
+  .flag-text { color: var(--text); line-height: 1.5; }
+  .flag-text span { color: var(--text2); font-size: 12px; display: block; margin-top: 2px; }
+
+  .url-breakdown {
+    padding: 14px 18px;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.8;
+    display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  }
+  .url-part { padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+  .url-part.scheme { background: rgba(52,199,143,0.12); color: var(--green); border: 1px solid var(--green-border); }
+  .url-part.domain { background: rgba(226,75,74,0.12); color: var(--red); border: 1px solid var(--red-border); }
+  .url-part.subdomain { background: rgba(239,159,39,0.12); color: var(--amber); border: 1px solid var(--amber-border); }
+  .url-part.path { background: rgba(122,143,166,0.1); color: var(--text2); border: 1px solid var(--border2); }
+  .url-part.ok { background: rgba(52,199,143,0.08); color: var(--green); border: 1px solid var(--green-border); }
+
+  .samples {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-top: 14px;
+  }
+  .sample-label { font-size: 11px; color: var(--text3); width: 100%; }
+  .sample-btn {
+    padding: 5px 12px;
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    color: var(--text2);
+    border-radius: 20px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: var(--mono);
+    transition: all 0.15s;
+  }
+  .sample-btn:hover { border-color: var(--green); color: var(--green); }
+
+  /* ─── QUIZ ─── */
+  .quiz-progress-row {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 16px;
+  }
+  .q-prog-bar { flex: 1; height: 5px; background: var(--surface); border-radius: 20px; overflow: hidden; border: 1px solid var(--border); }
+  .q-prog-fill { height: 100%; background: var(--green); border-radius: 20px; transition: width 0.3s; }
+  .q-count { font-size: 11px; color: var(--text2); white-space: nowrap; }
+
+  .quiz-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .q-eyebrow { font-size: 11px; color: var(--green); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+  .q-text { font-size: 15px; font-weight: 500; line-height: 1.55; color: var(--text); margin-bottom: 14px; }
+  .q-snippet {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text2);
+    margin-bottom: 14px;
+    line-height: 1.8;
+  }
+  .q-snippet .bad { color: var(--red); }
+  .q-snippet .ok { color: var(--green); }
+  .q-snippet .warn { color: var(--amber); }
+
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .opt {
+    padding: 12px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 13px;
+    cursor: pointer;
+    font-family: var(--sans);
+    text-align: left;
+    display: flex; align-items: center; gap: 10px;
+    transition: all 0.15s;
+  }
+  .opt:hover:not(:disabled) { border-color: var(--green); background: var(--green-dim); }
+  .opt .opt-i { font-size: 14px; color: var(--text3); width: 16px; flex-shrink: 0; }
+  .opt.correct { border-color: var(--green); background: var(--green-dim); }
+  .opt.correct .opt-i { color: var(--green); }
+  .opt.wrong { border-color: var(--red); background: var(--red-dim); }
+  .opt.wrong .opt-i { color: var(--red); }
+
+  .feedback {
+    display: none;
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    line-height: 1.6;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+  }
+  .feedback.show { display: block; }
+  .feedback b { color: var(--text); }
+
+  .next-btn {
+    margin-top: 14px;
+    padding: 10px 22px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-family: var(--sans);
+    display: none;
+    align-items: center; gap: 7px;
+    transition: all 0.15s;
+  }
+  .next-btn:hover { border-color: var(--green); color: var(--green); }
+  .next-btn.show { display: flex; }
+
+  /* score screen */
+  .score-screen {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .score-screen.show { display: block; }
+  .score-donut {
+    width: 110px; height: 110px;
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 600;
+    border: 4px solid var(--green);
+    background: var(--green-dim);
+    color: var(--text);
+  }
+  .score-donut.mid { border-color: var(--amber); background: var(--amber-dim); }
+  .score-donut.low { border-color: var(--red); background: var(--red-dim); }
+  .score-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+  .score-sub { font-size: 13px; color: var(--text2); max-width: 340px; margin: 0 auto 24px; line-height: 1.6; }
+  .retry {
+    padding: 10px 28px;
+    background: var(--green);
+    color: #0b0f14;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--sans);
+  }
+
+  /* ─── TACTICS ─── */
+  .tactics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .tactic-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .tactic-icon { font-size: 22px; margin-bottom: 10px; }
+  .tactic-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+  .tactic-desc { font-size: 12px; color: var(--text2); line-height: 1.65; }
+  .tactic-risk {
+    display: inline-block; margin-top: 10px;
+    font-size: 10px; font-weight: 600; padding: 3px 10px;
+    border-radius: 12px; letter-spacing: 0.3px;
+  }
+  .high-risk { background: var(--red-dim); color: var(--red); border: 1px solid var(--red-border); }
+  .med-risk { background: var(--amber-dim); color: var(--amber); border: 1px solid var(--amber-border); }
+
+  /* footer */
+  .footer {
+    max-width: 760px;
+    margin: 32px auto 0;
+    font-size: 11px;
+    color: var(--text3);
+    text-align: center;
+  }
+
+  /* ─── THEME TOGGLE ─── */
+  .theme-toggle {
+    margin-left: 10px;
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    color: var(--text2);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .theme-toggle:hover { border-color: var(--green); color: var(--green); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo"><i class="fa-solid fa-shield-halved"></i></div>
+  <div class="header-text">
+    <h1>PhishGuard v2</h1>
+    <p>URL Scanner · Risk Assessment · Awareness Quiz</p>
+  </div>
+  <div class="edu-badge"><i class="fa-solid fa-lock" style="margin-right:5px;font-size:10px;"></i>Educational Only</div>
+  <button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">
+    <i class="fa-solid fa-sun" id="theme-icon"></i>
+  </button>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('scanner',this)"><i class="fa-solid fa-magnifying-glass"></i> URL Scanner</button>
+  <button class="tab" onclick="switchTab('tactics',this)"><i class="fa-solid fa-triangle-exclamation"></i> Tactics</button>
+  <button class="tab" onclick="switchTab('quiz',this)"><i class="fa-solid fa-clipboard-check"></i> Quiz</button>
+</div>
+
+<div class="wrap">
+
+  <!-- SCANNER -->
+  <div id="sec-scanner" class="section active">
+    <div class="scanner-box">
+      <div class="scanner-label"><i class="fa-solid fa-terminal"></i> Paste a URL to analyze for phishing indicators</div>
+      <div class="input-row">
+        <input class="url-input" id="url-input" type="text" placeholder="https://example.com/verify-account" />
+        <button class="scan-btn" onclick="scanURL()"><i class="fa-solid fa-radar"></i> Scan</button>
+      </div>
+      <div class="samples">
+        <div class="sample-label">Try a sample:</div>
+        <button class="sample-btn" onclick="loadSample('http://paypa1-secure-login.com/verify?user=you')">Typosquat bank</button>
+        <button class="sample-btn" onclick="loadSample('https://amazon-account-verify.secure-login.ru/signin')">Subdomain spoof</button>
+        <button class="sample-btn" onclick="loadSample('http://company-helpdesk-portal.net.malicious.io/reset')">IT credential harvest</button>
+        <button class="sample-btn" onclick="loadSample('https://github.com/login')">Legit site</button>
+        <button class="sample-btn" onclick="loadSample('https://paypal.com/signin')">Legit PayPal</button>
+      </div>
+    </div>
+    <div class="result-panel" id="result-panel"></div>
+  </div>
+
+  <!-- TACTICS -->
+  <div id="sec-tactics" class="section">
+    <div class="tactics-grid" id="tactics-grid"></div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="sec-quiz" class="section">
+    <div class="quiz-progress-row">
+      <div class="q-prog-bar"><div class="q-prog-fill" id="q-prog" style="width:0%"></div></div>
+      <div class="q-count" id="q-count">1 / 6</div>
+    </div>
+    <div id="quiz-main"></div>
+    <div class="score-screen" id="score-screen"></div>
+  </div>
+
+</div>
+
+<div class="footer">PhishGuard v2 · DecodeLab Internship · Task 3 · For educational use only — no actual URLs are sent to any server.</div>
+
+<script>
+// ════════════════════════════════════════════════
+//  URL SCANNER ENGINE
+// ════════════════════════════════════════════════
+const LEGIT_DOMAINS = [
+  'google.com','gmail.com','youtube.com','facebook.com','instagram.com',
+  'twitter.com','x.com','linkedin.com','github.com','microsoft.com',
+  'apple.com','amazon.com','paypal.com','netflix.com','spotify.com',
+  'dropbox.com','zoom.us','slack.com','notion.so','trello.com',
+  'cloudflare.com','stackoverflow.com','wikipedia.org','reddit.com'
+];
+
+const SUSPICIOUS_TLDS = ['.ru','.xyz','.tk','.ml','.ga','.cf','.gq','.pw','.top','.click','.loan','.work','.party'];
+const PHISH_KEYWORDS = ['verify','secure-login','account-verify','signin-help','update-info','confirm-identity','reset-portal','helpdesk-portal','banking-secure','unlock','suspended','limited'];
+const BRAND_NAMES = ['paypal','amazon','apple','google','microsoft','netflix','facebook','instagram','ebay','chase','wellsfargo','bankofamerica','citibank'];
+
+function extractDomain(url) {
+  try {
+    if (!url.startsWith('http')) url = 'https://' + url;
+    const u = new URL(url);
+    return { hostname: u.hostname, protocol: u.protocol, pathname: u.pathname, search: u.search };
+  } catch(e) { return null; }
+}
+
+function getRootDomain(hostname) {
+  const parts = hostname.split('.');
+  if (parts.length >= 2) return parts.slice(-2).join('.');
+  return hostname;
+}
+
+function scanURL() {
+  const raw = document.getElementById('url-input').value.trim();
+  if (!raw) { alert('Please enter a URL.'); return; }
+
+  const parsed = extractDomain(raw);
+  if (!parsed) { alert('Invalid URL format. Include https:// or http://'); return; }
+
+  const { hostname, protocol, pathname, search } = parsed;
+  const root = getRootDomain(hostname);
+  const flags = [];
+  let riskScore = 0;
+
+  // 1. HTTP (no TLS)
+  if (protocol === 'http:') {
+    flags.push({ level:'high', text:'No HTTPS — connection is unencrypted', sub:'Legitimate sites use HTTPS. HTTP allows attackers to intercept your data.' });
+    riskScore += 30;
+  }
+
+  // 2. Suspicious TLD
+  const tldMatch = SUSPICIOUS_TLDS.find(t => hostname.endsWith(t));
+  if (tldMatch) {
+    flags.push({ level:'high', text:`Suspicious TLD detected: ${tldMatch}`, sub:'Phishers register cheap/free TLDs (.ru, .tk, .xyz) to host fake sites.' });
+    riskScore += 35;
+  }
+
+  // 3. Brand name in subdomain (not root)
+  const subdomain = hostname.replace(root,'').replace(/\.$/,'');
+  const brandInSub = BRAND_NAMES.find(b => subdomain.includes(b));
+  if (brandInSub) {
+    flags.push({ level:'high', text:`Brand name "${brandInSub}" found in subdomain, not root domain`, sub:`${hostname} — The real domain is ${root}, not ${brandInSub}.com. Classic subdomain spoofing.` });
+    riskScore += 40;
+  }
+
+  // 4. Brand in root but not legit
+  const brandInRoot = BRAND_NAMES.find(b => root.includes(b));
+  if (brandInRoot && !LEGIT_DOMAINS.includes(root)) {
+    flags.push({ level:'high', text:`Typosquatting: "${brandInRoot}" in domain but not the official site`, sub:`Real domain would be ${brandInRoot}.com — this is a lookalike designed to deceive.` });
+    riskScore += 45;
+  }
+
+  // 5. Phishing keywords in path/domain
+  const fullUrl = hostname + pathname + search;
+  const kwMatch = PHISH_KEYWORDS.filter(k => fullUrl.toLowerCase().includes(k));
+  if (kwMatch.length) {
+    flags.push({ level:'med', text:`Phishing keywords found: ${kwMatch.join(', ')}`, sub:'Legitimate services rarely use these terms in URLs. Attackers use them to appear credible.' });
+    riskScore += kwMatch.length * 12;
+  }
+
+  // 6. Excessive subdomains
+  const subCount = hostname.split('.').length - 2;
+  if (subCount >= 2) {
+    flags.push({ level:'med', text:`${subCount} subdomain levels detected`, sub:'Deeply nested subdomains (a.b.c.domain.com) are used to bury the real domain.' });
+    riskScore += subCount * 10;
+  }
+
+  // 7. Long domain name
+  if (root.length > 20) {
+    flags.push({ level:'med', text:`Unusually long domain: ${root}`, sub:'Long domain names are a red flag — legitimate brands keep domains short and memorable.' });
+    riskScore += 15;
+  }
+
+  // 8. Hyphens in domain
+  const hyphenCount = root.split('-').length - 1;
+  if (hyphenCount >= 2) {
+    flags.push({ level:'med', text:`${hyphenCount} hyphens in domain name`, sub:'Multiple hyphens are common in phishing domains (secure-login-paypal-verify.com).' });
+    riskScore += hyphenCount * 8;
+  }
+
+  // 9. Numbers replacing letters (leet)
+  if (/[0-9]/.test(root.replace(/\.(com|net|org|io|co)$/,''))) {
+    flags.push({ level:'med', text:'Digits in domain — possible leet-speak substitution', sub:'e.g. paypa1.com replaces "l" with "1" to evade detection while looking identical.' });
+    riskScore += 20;
+  }
+
+  // 10. Is legit
+  if (LEGIT_DOMAINS.includes(root) && !brandInSub && protocol === 'https:' && flags.length === 0) {
+    flags.push({ level:'low', text:'Domain is on the known-legitimate list', sub:'No suspicious patterns detected. Always verify the full URL before entering credentials.' });
+  }
+
+  // Cap score
+  riskScore = Math.min(riskScore, 100);
+
+  let level, icon, label, sub;
+  if (riskScore >= 55 || flags.some(f=>f.level==='high')) {
+    level = 'HIGH'; icon = 'fa-circle-xmark'; label = 'High Risk — Likely Phishing'; sub = 'Multiple phishing indicators detected. Do not visit this URL.';
+  } else if (riskScore >= 25) {
+    level = 'MED'; icon = 'fa-circle-exclamation'; label = 'Medium Risk — Suspicious'; sub = 'Some indicators detected. Proceed with extreme caution.';
+  } else {
+    level = 'LOW'; icon = 'fa-circle-check'; label = 'Low Risk — Appears Legitimate'; sub = 'No major red flags found. Always stay vigilant.';
+  }
+
+  // Breakdown parts
+  const subdomainPart = subdomain ? `<span class="url-part subdomain">${subdomain}.</span>` : '';
+  const schemePart = `<span class="url-part ${protocol==='https:'?'scheme':'domain'}">${protocol}//</span>`;
+  const rootPart = `<span class="url-part ${(brandInRoot && !LEGIT_DOMAINS.includes(root))||brandInSub?'domain':'ok'}">${root}</span>`;
+  const pathPart = pathname !== '/' ? `<span class="url-part path">${pathname}${search}</span>` : '';
+
+  const panel = document.getElementById('result-panel');
+  panel.className = `result-panel show risk-${level}`;
+  panel.innerHTML = `
+    <div class="risk-header">
+      <i class="fa-solid ${icon} risk-icon"></i>
+      <div>
+        <div class="risk-label">${label}</div>
+        <div class="risk-sub">${sub}</div>
+      </div>
+      <span class="risk-badge">${level}</span>
+    </div>
+    <div class="flags-list">
+      ${flags.map(f=>`
+        <div class="flag-row">
+          <div class="flag-dot ${f.level}"></div>
+          <div class="flag-text">${f.text}<span>${f.sub}</span></div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="url-breakdown">
+      <span style="color:var(--text3);font-size:11px;width:100%;margin-bottom:4px;">URL BREAKDOWN</span>
+      ${schemePart}${subdomainPart}${rootPart}${pathPart}
+    </div>
+  `;
+}
+
+function loadSample(url) {
+  document.getElementById('url-input').value = url;
+  scanURL();
+}
+
+document.getElementById('url-input').addEventListener('keydown', e => { if(e.key==='Enter') scanURL(); });
+
+// ════════════════════════════════════════════════
+//  TACTICS
+// ════════════════════════════════════════════════
+const tactics = [
+  { icon:'fa-clock', name:'Urgency & Scarcity', desc:'Creates fake time pressure — "act in 24 hours" — to stop targets from thinking clearly or verifying requests before acting.', risk:'high' },
+  { icon:'fa-link', name:'URL Spoofing & Typosquatting', desc:'Replaces real domains with near-identical fakes: paypa1.com vs paypal.com. One character difference defeats untrained eyes.', risk:'high' },
+  { icon:'fa-user-shield', name:'Authority Impersonation', desc:'Poses as IT, HR, your bank, or an executive to exploit the instinct to comply with authority without questioning legitimacy.', risk:'high' },
+  { icon:'fa-heart', name:'Emotional Manipulation', desc:'Fear (account suspended), greed (you won a prize), or curiosity (you\'ve been mentioned) override rational thinking.', risk:'high' },
+  { icon:'fa-envelope', name:'Email Spoofing', desc:'Forges the display name so the inbox shows "Google Security Team" while the actual sender is attacker@malicious.ru.', risk:'med' },
+  { icon:'fa-masks-theater', name:'Pretexting', desc:'Builds a believable fake scenario — a routine IT audit, a policy update — to make the malicious request feel normal.', risk:'med' }
+];
+
+document.getElementById('tactics-grid').innerHTML = tactics.map(t=>`
+  <div class="tactic-card">
+    <div class="tactic-icon"><i class="fa-solid ${t.icon}" style="color:${t.risk==='high'?'var(--red)':'var(--amber)'}"></i></div>
+    <div class="tactic-name">${t.name}</div>
+    <div class="tactic-desc">${t.desc}</div>
+    <span class="tactic-risk ${t.risk==='high'?'high-risk':'med-risk'}">${t.risk==='high'?'HIGH IMPACT':'MEDIUM IMPACT'}</span>
+  </div>
+`).join('');
+
+// ════════════════════════════════════════════════
+//  QUIZ ENGINE
+// ════════════════════════════════════════════════
+const questions = [
+  {
+    eyebrow:'URL Analysis',
+    q:'Which of these URLs is a phishing attempt?',
+    snippet:`A: <span class="ok">https://paypal.com/signin</span>\nB: <span class="bad">http://paypa1-secure.com/signin</span>\nC: <span class="ok">https://github.com/login</span>\nD: <span class="ok">https://amazon.com/account</span>`,
+    opts:['A — paypal.com','B — paypa1-secure.com','C — github.com','D — amazon.com'],
+    answer:1,
+    fb:'<b>B is correct.</b> paypa1-secure.com uses a "1" instead of "l" (typosquatting) and HTTP instead of HTTPS. Both are high-risk indicators. Never trust URLs that misspell a known brand.'
+  },
+  {
+    eyebrow:'Social Engineering',
+    q:'An email says "Your account expires in 2 hours — click to verify immediately." What tactic is this?',
+    opts:['Pretexting','Credential harvesting','Urgency manipulation','Email spoofing'],
+    answer:2,
+    fb:'<b>Urgency manipulation.</b> Artificial deadlines stop people from verifying. Legitimate services never suspend accounts within hours via email with no prior warning. Pause — then verify via official channels.'
+  },
+  {
+    eyebrow:'Email Headers',
+    q:'Your inbox shows "From: PayPal Security Team." Is this proof the email is from PayPal?',
+    opts:['Yes — display names are verified','No — anyone can set any display name','Only if it has the PayPal logo','Yes if it was sent to your work email'],
+    answer:1,
+    fb:'<b>No.</b> Display names are completely unverified. The real sender could be attacker@random.ru while the display shows "PayPal Security Team." Always expand the From field to see the actual email address.'
+  },
+  {
+    eyebrow:'URL Structure',
+    q:'What is the actual domain (root) in this URL?',
+    snippet:`<span class="bad">http://paypal.account-verify.secure-login.ru/update</span>`,
+    opts:['paypal.com','account-verify.com','secure-login.ru','paypal.account-verify'],
+    answer:2,
+    fb:'<b>secure-login.ru</b> is the real domain. "paypal" and "account-verify" are subdomains — they can be set to anything by the attacker. The domain you\'re actually visiting is secure-login.ru, which is a Russian TLD with no connection to PayPal.'
+  },
+  {
+    eyebrow:'Risk Assessment',
+    q:'Which combination of factors indicates the HIGHEST phishing risk?',
+    opts:[
+      'HTTPS + known brand name in domain',
+      'HTTP + typosquatted domain + urgency language in email',
+      'Long URL + HTTPS + no keywords',
+      'Subdomain present + HTTPS'
+    ],
+    answer:1,
+    fb:'<b>HTTP + typosquatted domain + urgency</b> is a triple red flag. No TLS means no encryption, the domain impersonates a brand, and urgency prevents verification. Any single one warrants caution — all three together means definite phishing.'
+  },
+  {
+    eyebrow:'Defence',
+    q:'You get an email from "IT Support" asking you to reset your password via a link. What is the CORRECT response?',
+    opts:[
+      'Click the link — IT emails are always safe',
+      'Forward it to a colleague to check',
+      'Ignore it',
+      'Contact IT through your company\'s official portal or phone number to verify — do not click the link'
+    ],
+    answer:3,
+    fb:'<b>Always verify through a separate, known-good channel.</b> Real IT password reset workflows include a ticket number, use SSO, and are pre-announced. Calling your IT helpdesk takes 30 seconds and prevents a full credential compromise.'
+  }
+];
+
+let currentQ = 0, score = 0, answered = false;
+
+function renderQ() {
+  const q = questions[currentQ];
+  document.getElementById('q-prog').style.width = (currentQ / questions.length * 100) + '%';
+  document.getElementById('q-count').textContent = (currentQ+1) + ' / ' + questions.length;
+  document.getElementById('quiz-main').innerHTML = `
+    <div class="quiz-card">
+      <div class="q-eyebrow">${q.eyebrow}</div>
+      <div class="q-text">${q.q}</div>
+      ${q.snippet ? `<div class="q-snippet">${q.snippet.replace(/\n/g,'<br>')}</div>` : ''}
+      <div class="options">
+        ${q.opts.map((o,i)=>`
+          <button class="opt" onclick="selectOpt(${i})">
+            <i class="fa-regular fa-circle opt-i" id="oi-${i}"></i>${o}
+          </button>
+        `).join('')}
+      </div>
+      <div class="feedback" id="feedback"></div>
+      <button class="next-btn" id="next-btn" onclick="nextQ()">
+        <i class="fa-solid fa-arrow-right"></i>
+        ${currentQ < questions.length-1 ? 'Next question' : 'See results'}
+      </button>
+    </div>
+  `;
+  answered = false;
+}
+
+function selectOpt(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[currentQ];
+  document.querySelectorAll('.opt').forEach((b,i) => {
+    b.disabled = true;
+    const ic = document.getElementById('oi-'+i);
+    if (i === q.answer) {
+      b.classList.add('correct');
+      if(ic) { ic.className='fa-solid fa-circle-check opt-i'; }
+    } else if (i === idx) {
+      b.classList.add('wrong');
+      if(ic) { ic.className='fa-solid fa-circle-xmark opt-i'; }
+    }
+  });
+  if (idx === q.answer) score++;
+  const fb = document.getElementById('feedback');
+  fb.innerHTML = (idx===q.answer
+    ? `<span style="color:var(--green)"><b>Correct.</b></span> `
+    : `<span style="color:var(--red)"><b>Incorrect.</b></span> `) + q.fb;
+  fb.classList.add('show');
+  document.getElementById('next-btn').classList.add('show');
+}
+
+function nextQ() {
+  currentQ++;
+  if (currentQ >= questions.length) showScore();
+  else renderQ();
+}
+
+function showScore() {
+  document.getElementById('q-prog').style.width = '100%';
+  document.getElementById('quiz-main').style.display = 'none';
+  const pct = Math.round(score / questions.length * 100);
+  const ss = document.getElementById('score-screen');
+  let ringClass = pct >= 80 ? '' : pct >= 50 ? 'mid' : 'low';
+  let title = pct >= 80 ? 'Strong phishing awareness' : pct >= 50 ? 'Getting there — review the gaps' : 'High risk — revisit examples & tactics';
+  let sub = `${score} of ${questions.length} correct (${pct}%). ` +
+    (pct >= 80 ? 'You can spot most attacks. Stay sharp — tactics evolve constantly.' :
+     'Go through the URL Scanner and Tactics tab, then retake the quiz.');
+  ss.innerHTML = `
+    <div class="score-donut ${ringClass}">${pct}%</div>
+    <div class="score-title">${title}</div>
+    <div class="score-sub">${sub}</div>
+    <button class="retry" onclick="resetQuiz()">Retake quiz</button>
+  `;
+  ss.classList.add('show');
+}
+
+function resetQuiz() {
+  currentQ = 0; score = 0; answered = false;
+  document.getElementById('quiz-main').style.display = 'block';
+  document.getElementById('score-screen').classList.remove('show');
+  renderQ();
+}
+
+// ════════════════════════════════════════════════
+//  TAB SWITCH
+// ════════════════════════════════════════════════
+function switchTab(id, el) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ════════════════════════════════════════════════
+//  THEME TOGGLE
+// ════════════════════════════════════════════════
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const icon = document.getElementById('theme-icon');
+  icon.className = theme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+  try { localStorage.setItem('phishguard-theme', theme); } catch(e) {}
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  applyTheme(current === 'light' ? 'dark' : 'light');
+}
+
+(function initTheme() {
+  let saved = null;
+  try { saved = localStorage.getItem('phishguard-theme'); } catch(e) {}
+  applyTheme(saved === 'light' ? 'light' : 'dark');
+})();
+
+// init
+renderQ();
+</script>
+</body>
+</html>
