@@ -7,7 +7,7 @@
 
 ## 🎣 Phishing Awareness Quiz
 
-**DecodeLab Cybersecurity Internship — Task 4**
+**DecodeLab Cybersecurity Internship — Task 3**
 
 An interactive, browser-based phishing awareness training tool. Users review realistic email simulations and answer knowledge questions to build the instincts needed to spot phishing attacks in real life.
 
