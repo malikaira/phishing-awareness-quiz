@@ -35,10 +35,10 @@ An interactive, browser-based phishing awareness training tool. Users review rea
 
 ```bash
 # Clone the repo
-git clone https://github.com/your-username/phishing-quiz.git
+git clone https://github.com/malikaira/phishing-awareness-quiz.git
 
 # Open in browser — that's it
-open phishing-quiz-enhanced.html
+open Phishing-Awareness.html
 ```
 
 Or just download the HTML file and open it directly in any modern browser. No server needed.
